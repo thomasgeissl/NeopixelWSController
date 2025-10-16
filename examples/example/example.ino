@@ -1,12 +1,12 @@
-#include <NeopixelWSController.h>
+#include <NeopixelCommander.h>
 
-NeopixelWSController lights("HomeSSID", "MySecretPass", 5, 16);
+NeopixelCommander neopixelCommander("HomeSSID", "MySecretPass", 5, 64);
 
 void setup() {
-  lights.setConnectTimeout(10000); // try STA for 10 s
-  lights.begin();
+  neopixelCommander.setConnectTimeout(10000); // try STA for 10 s
+  neopixelCommander.begin();
 }
 
 void loop() {
-  lights.loop();
+  neopixelCommander.loop();
 }
