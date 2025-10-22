@@ -3,7 +3,7 @@
 NeopixelCommander neopixelCommander("HomeSSID", "MySecretPass", 5, 64);
 
 void setup() {
-  neopixelCommander.setConnectTimeout(10000); // try STA for 10 s
+  Serial.begin(115200);
   neopixelCommander.begin();
 }
 
