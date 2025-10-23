@@ -43,7 +43,8 @@ public:
   void begin()
   {
     Serial.begin(115200);
-    if (DEBUG_LOGGING) Serial.printf("NeopixelWSController starting. Trying STA connect to '%s'\n", _ssid);
+    if (DEBUG_LOGGING)
+      Serial.printf("NeopixelWSController starting. Trying STA connect to '%s'\n", _ssid);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(_ssid, _password);
@@ -59,17 +60,20 @@ public:
         break;
       }
       delay(250);
-      if (DEBUG_LOGGING) Serial.print(".");
+      if (DEBUG_LOGGING)
+        Serial.print(".");
     }
 
     if (staConnected)
     {
-      if (DEBUG_LOGGING) Serial.printf("\nConnected as STA. IP: %s\n", WiFi.localIP().toString().c_str());
+      if (DEBUG_LOGGING)
+        Serial.printf("\nConnected as STA. IP: %s\n", WiFi.localIP().toString().c_str());
     }
     else
     {
-      if (DEBUG_LOGGING) Serial.printf("\nSTA connect failed after %u ms. Starting SoftAP with SSID '%s'\n",
-                    (unsigned)_connectTimeoutMs, _ssid);
+      if (DEBUG_LOGGING)
+        Serial.printf("\nSTA connect failed after %u ms. Starting SoftAP with SSID '%s'\n",
+                      (unsigned)_connectTimeoutMs, _ssid);
 
       if (_password != nullptr && strlen(_password) >= 8)
       {
@@ -77,19 +81,22 @@ public:
         bool ok = WiFi.softAP(_ssid, _password);
         if (!ok)
         {
-          if (DEBUG_LOGGING) Serial.println("softAP() returned false. Attempting open AP (no password).");
+          if (DEBUG_LOGGING)
+            Serial.println("softAP() returned false. Attempting open AP (no password).");
           WiFi.softAP(_ssid);
         }
       }
       else
       {
-        if (DEBUG_LOGGING) Serial.println("Password too short for WPA2; starting open AP.");
+        if (DEBUG_LOGGING)
+          Serial.println("Password too short for WPA2; starting open AP.");
         WiFi.mode(WIFI_AP);
         WiFi.softAP(_ssid);
       }
 
       delay(500);
-      if (DEBUG_LOGGING) Serial.printf("SoftAP active. AP IP: %s\n", WiFi.softAPIP().toString().c_str());
+      if (DEBUG_LOGGING)
+        Serial.printf("SoftAP active. AP IP: %s\n", WiFi.softAPIP().toString().c_str());
     }
 
     _strip.begin();
@@ -135,7 +142,7 @@ public:
                {
       _strip.clear();
       request->send(200, "application/json", "{\"status\":\"ok\"}"); });
-    
+
     _server.on("/api/clear", HTTP_GET, [this](AsyncWebServerRequest *request)
                {
       _strip.clear();
@@ -154,20 +161,25 @@ public:
     _server.on("/api/show", HTTP_POST, [this](AsyncWebServerRequest *request)
                {
                  this->show();
-                 request->send(200, "application/json", "{\"status\":\"ok\"}");
-               });
+                 request->send(200, "application/json", "{\"status\":\"ok\"}"); });
+    _server.on("/api/show", HTTP_GET, [this](AsyncWebServerRequest *request)
+               {
+                 this->show();
+                 request->send(200, "application/json", "{\"status\":\"ok\"}"); });
 
     _server.begin();
 
     IPAddress ip = (WiFi.getMode() & WIFI_AP) ? WiFi.softAPIP() : WiFi.localIP();
-    if (DEBUG_LOGGING) Serial.printf("WebSocket endpoint: ws://%s/ws\n", ip.toString().c_str());
-    if (DEBUG_LOGGING) Serial.printf("HTTP ping endpoint: http://%s/ping\n", ip.toString().c_str());
+    if (DEBUG_LOGGING)
+      Serial.printf("WebSocket endpoint: ws://%s/ws\n", ip.toString().c_str());
+    if (DEBUG_LOGGING)
+      Serial.printf("HTTP ping endpoint: http://%s/ping\n", ip.toString().c_str());
   }
 
   void loop()
   {
     _ws.cleanupClients();
-    
+
     // Process multiple commands per loop to keep up with incoming rate
     int processed = 0;
     while (queueStart != queueEnd && processed < COMMANDS_PER_LOOP)
@@ -204,7 +216,7 @@ public:
         snprintf(ackMsg, sizeof(ackMsg), "{\"status\":\"ok\",\"ack\":%u}", cmd.commandId);
         client->text(ackMsg);
       }
-      
+
       processed++;
     }
   }
@@ -214,7 +226,7 @@ public:
     for (uint16_t i = 0; i < _numPixels; ++i)
       _strip.setPixelColor(i, _strip.Color(r, g, b));
   }
-  
+
   void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b)
   {
     if (n < _numPixels)
@@ -227,12 +239,12 @@ public:
   {
     _strip.clear();
   }
-  
+
   void show()
   {
     _strip.show();
   }
-  
+
   void setBrightness(uint8_t brightness)
   {
     _strip.setBrightness(brightness);
@@ -240,7 +252,7 @@ public:
 
 private:
   static const uint16_t QUEUE_SIZE = 512;
-  
+
   const char *_ssid;
   const char *_password;
   uint8_t _pin;
@@ -261,7 +273,8 @@ private:
     uint16_t nextEnd = (queueEnd + 1) % QUEUE_SIZE;
     if (nextEnd == queueStart)
     {
-      if (DEBUG_LOGGING) Serial.printf("WARNING: Command queue full! Dropping command ID %u\n", cmd.commandId);
+      if (DEBUG_LOGGING)
+        Serial.printf("WARNING: Command queue full! Dropping command ID %u\n", cmd.commandId);
       return false;
     }
     commandQueue[queueEnd] = cmd;
@@ -274,11 +287,13 @@ private:
   {
     if (type == WS_EVT_CONNECT)
     {
-      if (DEBUG_LOGGING) Serial.printf("WebSocket client #%u connected\n", client->id());
+      if (DEBUG_LOGGING)
+        Serial.printf("WebSocket client #%u connected\n", client->id());
     }
     else if (type == WS_EVT_DISCONNECT)
     {
-      if (DEBUG_LOGGING) Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      if (DEBUG_LOGGING)
+        Serial.printf("WebSocket client #%u disconnected\n", client->id());
     }
     else if (type == WS_EVT_DATA)
     {
@@ -286,47 +301,50 @@ private:
       if (info->final && info->opcode == WS_TEXT)
       {
         data[len] = 0;
-        
+
         // Check for simple "ping" message (not JSON)
         if (strcmp((char *)data, "ping") == 0)
         {
-          if (DEBUG_LOGGING) Serial.printf("Received WebSocket ping from client #%u\n", client->id());
+          if (DEBUG_LOGGING)
+            Serial.printf("Received WebSocket ping from client #%u\n", client->id());
           client->text("{\"status\":\"ok\",\"message\":\"pong\"}");
           return;
         }
-        
+
         StaticJsonDocument<512> doc;
         if (deserializeJson(doc, (char *)data) == DeserializationError::Ok)
         {
-          const char* cmd = doc["cmd"] | "";
-          
+          const char *cmd = doc["cmd"] | "";
+
           // Handle JSON ping command
           if (strcmp(cmd, "ping") == 0)
           {
-            if (DEBUG_LOGGING) Serial.printf("Received WebSocket ping (JSON) from client #%u\n", client->id());
+            if (DEBUG_LOGGING)
+              Serial.printf("Received WebSocket ping (JSON) from client #%u\n", client->id());
             client->text("{\"status\":\"ok\",\"message\":\"pong\"}");
             return;
           }
-          
+
           // Handle getPixelCount command
           if (strcmp(cmd, "getPixelCount") == 0)
           {
-            if (DEBUG_LOGGING) Serial.printf("Received getPixelCount from client #%u\n", client->id());
+            if (DEBUG_LOGGING)
+              Serial.printf("Received getPixelCount from client #%u\n", client->id());
             char response[64];
             snprintf(response, sizeof(response), "{\"status\":\"ok\",\"pixelCount\":%u}", _numPixels);
             client->text(response);
             return;
           }
-          
+
           uint32_t id = doc["id"] | 0; // Get command ID from client
-          
+
           if (id == 0)
           {
             // Command ID is required for non-ping commands
             client->text("{\"status\":\"error\",\"error\":\"missing_id\"}");
             return;
           }
-          
+
           Command command;
           command.clientId = client->id();
           command.commandId = id;
@@ -350,7 +368,7 @@ private:
             command.r = doc["r"] | 0;
             command.g = doc["g"] | 0;
             command.b = doc["b"] | 0;
-            
+
             // Validate pixel index bounds
             if (command.index >= _numPixels)
             {
