@@ -33,10 +33,12 @@ struct Command
 class NeopixelCommander
 {
 public:
-  NeopixelCommander(const char *ssid, const char *password, uint8_t pin, uint16_t numPixels)
+  NeopixelCommander(const char *ssid, const char *password, uint8_t pin, uint16_t numPixels, uint16_t brightness)
       : _ssid(ssid), _password(password), _pin(pin), _numPixels(numPixels),
         _server(80), _ws("/ws"), _strip(numPixels, pin, NEO_GRB + NEO_KHZ800),
-        _connectTimeoutMs(15000) {}
+        _connectTimeoutMs(15000) {
+    _strip.setBrightness(brightness);
+        }
 
   void setConnectTimeout(uint32_t ms) { _connectTimeoutMs = ms; }
 

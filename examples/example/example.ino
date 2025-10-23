@@ -1,6 +1,6 @@
 #include <NeopixelCommander.h>
 
-NeopixelCommander neopixelCommander("HomeSSID", "MySecretPass", 5, 64);
+NeopixelCommander neopixelCommander("HomeSSID", "MySecretPass", 5, 64, 127);
 
 void setup() {
   Serial.begin(115200);
